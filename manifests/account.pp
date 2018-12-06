@@ -89,11 +89,15 @@ define accounts::account(
     }
 
     if $ensure != absent {
+
+      $authorized_keys_owned = $::accounts::ssh_keys.filter |$k, $v| { $v['owner'] == $user }.keys
+      $merged_keys = concat($authorized_keys_owned, $authorized_keys)
+
       if is_string($authorized_keys) or is_array($authorized_keys) {
         $user_has_key = has_key($::accounts::ssh_keys, $name) and $::accounts::ssh_keys[$name]['ensure'] != 'absent'
         $_authorized_keys = $user_has_key ? {
           true  => suffix(unique( delete_undef_values( flatten( [$authorized_keys, $name] ) ) ),"-on-${name}"),
-          false => suffix(unique( delete_undef_values( flatten( [$authorized_keys] ) ) ),"-on-${name}"),
+          false => suffix(unique( delete_undef_values( flatten( [$merged_keys] ) ) ),"-on-${name}"),
         }
         accounts::authorized_key { $_authorized_keys:
           account                  => $name,
