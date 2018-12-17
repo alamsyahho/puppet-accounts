@@ -91,7 +91,7 @@ define accounts::account(
     if $ensure != absent {
 
       #$authorized_keys_owned = $::accounts::ssh_keys.filter |$k, $v| { $v['owner'] == $user }.keys
-      authorized_keys_owned = $::accounts::ssh_keys.filter |$items| { $items[0] =~ $user }
+      $authorized_keys_owned = $::accounts::ssh_keys.filter |$items| { $items[0] =~ $user }
       $merged_keys = concat($authorized_keys_owned, $authorized_keys)
 
       if is_string($authorized_keys) or is_array($authorized_keys) {
